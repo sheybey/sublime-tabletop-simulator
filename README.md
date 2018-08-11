@@ -25,4 +25,9 @@ Create the appropriate folder and put the contents of the repository in it.
 
     To start it by default, uncomment line 66 in Tabletop Simulator.py.
 
+ -  Tabletop Simulator's API has been broken for quite a while under Linux. My
+    main operating system is Debian testing, so for the moment, this plugin is
+    unmaintained.
+    https://github.com/Berserk-Games/atom-tabletopsimulator-lua/issues/3
+
 [api]: http://berserk-games.com/knowledgebase/external-editor-api/
