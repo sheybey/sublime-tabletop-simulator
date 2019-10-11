@@ -24,6 +24,12 @@ def open_script(script, window):
     view.window().focus_view(view)
 
 
+def show_message_panel(window, message):
+    panel = window.create_output_panel('tts_messages')
+    panel.run_command('append_to_buffer', {'text': message})
+    window.run_command('show_panel', {'panel': 'output.tts_messages'})
+
+
 class EditorAPIHandler(socketserver.StreamRequestHandler):
     def handle(self):
         data = json.loads(self.rfile.read().decode("ascii"))
@@ -32,10 +38,7 @@ class EditorAPIHandler(socketserver.StreamRequestHandler):
             for script in data["scriptStates"]:
                 open_script(script, window)
         elif data["messageID"] == 2:
-            window.create_output_panel("tts_messages").run_command("append_to_buffer", {
-                "text": data["message"] + "\n"
-            })
-            window.run_command("show_panel", {"panel": "output.tts_messages"})
+            show_message_panel(window, data['message'])
 
         elif data["messageID"] == 3:
             view = views.get(data["guid"], None)
@@ -44,14 +47,15 @@ class EditorAPIHandler(socketserver.StreamRequestHandler):
             else:
                 window = view.window()
             window.focus_view(view)
-            window.create_output_panel("tts_messages").run_command("append_to_buffer", {
-                "text": data["errorMessagePrefix"] + data["error"] + "\n"
-            })
-            window.run_command("show_panel", {"panel": "output.tts_messages"})
+            show_message_panel(
+                window,
+                data["errorMessagePrefix"] + data["error"] + '\n'
+            )
         else:
-            window.create_output_panel('tts_messages').run_command('append_to_buffer', {
-                'text': 'unhandled message:\n' + repr(data) + '\n'
-            })
+            show_message_panel(
+                window,
+                'unhandled message:\n' + repr(data) + '\n'
+            )
 
 
 server = socketserver.TCPServer(("localhost", 39998), EditorAPIHandler, False)
