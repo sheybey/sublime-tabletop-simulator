@@ -9,18 +9,18 @@ views = {}
 
 
 def open_script(script, window):
-    view = views.get(script["guid"], None)
+    view = views.get(script['guid'], None)
     if view is not None:
-        view.run_command("erase_buffer")
+        view.run_command('erase_buffer')
     else:
         view = window.new_file()
-        views[script["guid"]] = view
-        view.set_syntax_file("Packages/Lua/Lua.sublime-syntax")
-    if script["guid"] != "-1":
-        view.set_name(script["name"] + " - " + script["guid"])
+        views[script['guid']] = view
+        view.set_syntax_file('Packages/Lua/Lua.sublime-syntax')
+    if script['guid'] != '-1':
+        view.set_name(script['name'] + ' - ' + script['guid'])
     else:
-        view.set_name(script["name"])
-    view.run_command("append_to_buffer", {"text": script["script"]})
+        view.set_name(script['name'])
+    view.run_command('append_to_buffer', {'text': script['script']})
     view.window().focus_view(view)
 
 
@@ -32,16 +32,16 @@ def show_message_panel(window, message):
 
 class EditorAPIHandler(socketserver.StreamRequestHandler):
     def handle(self):
-        data = json.loads(self.rfile.read().decode("ascii"))
+        data = json.load(self.rfile)
         window = sublime.active_window()
-        if data["messageID"] < 2:
-            for script in data["scriptStates"]:
+        if data['messageID'] < 2:
+            for script in data['scriptStates']:
                 open_script(script, window)
-        elif data["messageID"] == 2:
+        elif data['messageID'] == 2:
             show_message_panel(window, data['message'])
 
-        elif data["messageID"] == 3:
-            view = views.get(data["guid"], None)
+        elif data['messageID'] == 3:
+            view = views.get(data['guid'], None)
             if view is None:
                 view = window.active_view()
             else:
@@ -49,7 +49,7 @@ class EditorAPIHandler(socketserver.StreamRequestHandler):
             window.focus_view(view)
             show_message_panel(
                 window,
-                data["errorMessagePrefix"] + data["error"] + '\n'
+                data['errorMessagePrefix'] + data['error'] + '\n'
             )
         else:
             show_message_panel(
@@ -58,7 +58,7 @@ class EditorAPIHandler(socketserver.StreamRequestHandler):
             )
 
 
-server = socketserver.TCPServer(("localhost", 39998), EditorAPIHandler, False)
+server = socketserver.TCPServer(('localhost', 39998), EditorAPIHandler, False)
 
 
 def start_server():
@@ -85,50 +85,50 @@ class EraseBufferCommand(sublime_plugin.TextCommand):
 
 
 class AppendToBufferCommand(sublime_plugin.TextCommand):
-    def run(self, edit, text = ""):
+    def run(self, edit, text=''):
         self.view.insert(edit, self.view.size(), text)
 
 
 def send_data(data):
     view = sublime.active_window().active_view()
-    view.erase_status("z_tts_error")
+    view.erase_status('z_tts_error')
     response = bytes()
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:
-            client.connect(("localhost", 39999))
-            client.send(json.dumps(data).encode("ascii"))
-            while True:
-                r = client.recv(2048)
-                if not r: break
-                response += r
+            client.connect(('localhost', 39999))
+            json.dump(data, client.makefile('w', encoding='ascii'))
+            response = client.makefile('r', encoding='ascii').read()
         if not response:
             return None
-        return json.loads(response.decode("ascii"))
+        return json.loads(response)
     except ConnectionRefusedError:
-        print("unable to connect to Tabletop Simulator: Connection refused")
-        view.set_status("z_tts_error", "Unable to connect to Tabletop Simulator: Connection refused")
+        view.set_status(
+            'z_tts_error',
+            'Unable to connect to Tabletop Simulator: Connection refused'
+        )
         return None
 
 
 class GetScriptsCommand(sublime_plugin.WindowCommand):
     def run(self):
-        scripts = send_data({"messageID": 0})
+        scripts = send_data({'messageID': 0})
         if scripts is not None:
-            for script in scripts["scriptStates"]: open_script(script, self.window)
+            for script in scripts['scriptStates']:
+                open_script(script, self.window)
 
 
 class SendScriptsCommand(sublime_plugin.WindowCommand):
     def run(self):
-        scripts = []
-        for guid in views.keys():
-            scripts.append({
-                "guid": guid,
-                "script": views[guid].substr(
-                    sublime.Region(0, views[guid].size())
-                )
-            })
-        send_data({"messageID": 1, "scriptStates": scripts})
-    def is_enabled(self): return len(views) > 0
+        send_data({'messageID': 1, 'scriptStates': [
+            {
+                'guid': guid,
+                'script': view.substr(sublime.Region(0, view.size()))
+            }
+            for guid, view in views.items()
+        ]})
+
+    def is_enabled(self):
+        return len(views) > 0
 
 
 class CleanUpViews(sublime_plugin.EventListener):
@@ -136,4 +136,4 @@ class CleanUpViews(sublime_plugin.EventListener):
         for guid in views.keys():
             if view == views[guid]:
                 del views[guid]
-                return
+                break
