@@ -1,19 +1,19 @@
 [
-	{
-		"id": "tools",
-		"children":
-		[
-			{
-				"caption": "Tabletop Simulator",
-				"children":
-				[
-					{ "command": "start_server" },
-					{ "command": "stop_server" },
-					{ "caption": "-" },
-					{ "command": "get_scripts" },
-					{ "command": "send_scripts" }
-				]
-			}
-		]
-	}
+    {
+        "id": "tools",
+        "children":
+        [
+            {
+                "caption": "Tabletop Simulator",
+                "children":
+                [
+                    { "command": "start_server" },
+                    { "command": "stop_server" },
+                    { "caption": "-" },
+                    { "command": "get_scripts" },
+                    { "command": "send_scripts" }
+                ]
+            }
+        ]
+    }
 ]
