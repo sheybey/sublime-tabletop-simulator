@@ -14,16 +14,16 @@ You can quickly locate the Packages folder by opening Sublime and clicking
 `Preferences -> Browse Packages...`
 
 ## Usage
- 1. Start the server: `Tools -> Tabletop Simulator -> Start Server`
- 2. Launch Tabletop Simulator and load a save
- 3. Either open all existing scripts (`Tools -> Tabletop Simulator -> Get
+ 1. Launch Tabletop Simulator and load a save
+ 2. Either open all existing scripts (`Tools -> Tabletop Simulator -> Get
     Scripts`) or open a particular object's script by right-clicking it in
     Tabletop Simulator and choosing `Scripting -> Lua editor`
- 4. Send the edited scripts back to Tabletop Simulator: `Tools -> Tabletop
+ 3. Send the edited scripts back to Tabletop Simulator: `Tools -> Tabletop
     Simulator -> Send Scripts`
 
 ## Notes
- -  UI XML editing is currently unsupported.
+ -  UI XML editing is currently unsupported. This means that **any existing UI
+    XML will be lost if you use this plugin.**
  -  The only way to send scripts back is to send all of them by using the
     "Send Scripts" command. Individual editing of objects is not possible.
 
