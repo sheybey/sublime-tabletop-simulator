@@ -75,7 +75,7 @@ def plugin_loaded():
 
 def plugin_unloaded():
     server.shutdown()
-    server.close_server()
+    server.server_close()
 
 
 class EraseBufferCommand(sublime_plugin.TextCommand):
